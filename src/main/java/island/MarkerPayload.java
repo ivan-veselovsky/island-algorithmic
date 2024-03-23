@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class MarkerPayload {
+    // TODO: replace with a boolean:
     @Getter @Setter
     Classification classification;
 

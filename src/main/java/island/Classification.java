@@ -2,6 +2,7 @@ package island;
 
 import lombok.Getter;
 
+// TODO: remove this class, as there is only one classification
 public enum Classification {
     WATER_NEAR_ISLAND('~');
 

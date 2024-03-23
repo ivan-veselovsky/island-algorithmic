@@ -1,6 +1,5 @@
 package island;
 
-import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 
 import java.util.*;
@@ -32,7 +31,7 @@ public class Traversal<P> {
             if (!point.isVisited(uniqueMark)) {
                 boolean result = pointPreConsumer.test(point);
                 visitedCount++;
-                point.setVisitedMarker(uniqueMark);
+                point.markVisited(uniqueMark);
                 assert point.isVisited(uniqueMark);
                 if (!result) {
                     break; // business decided to stop traverse

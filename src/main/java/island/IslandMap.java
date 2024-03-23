@@ -142,8 +142,4 @@ public class IslandMap<T> {
             list[7] = safeGetPoint(x - 1, y - 1).orElse(null); // north - west
         return list;
     }
-
-//    int getWaterCardinality(Point<T> point) {
-//        return (int)getNeighbours(point).stream().filter(p -> !p.isLand()).count();
-//    }
 }

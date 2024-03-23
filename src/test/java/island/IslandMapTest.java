@@ -8,24 +8,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 // TODO:
-//  1) count map boundaries as sea;
+//  1) count map boundaries as sea (check if it works okay);
 //  2) support diagonal connectivity;
-//  3)
 class IslandMapTest {
-
-//    @SneakyThrows
-//    static String readContent(String resource) {
-//        URL url = IslandMapTest.class.getClassLoader().getResource(resource);
-//        return Files.readString(Paths.get(url.toURI()));
-//    }
 
     @SneakyThrows
     static Path resourcePath(String resource) {
@@ -70,7 +61,7 @@ class IslandMapTest {
         final Point<MarkerPayload> startPoint = islandMap.getPoint(22, 1);
         then(startPoint.isLand()).isTrue();
 
-        final Set<Point<MarkerPayload>> shorePoints = new HashSet<>();
+        final AtomicInteger shorePointsCount = new AtomicInteger();
         final MinMaxPointTracker minMaxPointTracker = new MinMaxPointTracker();
         final int count = traversal.traverseBFS(startPoint,
                 p -> {
@@ -80,11 +71,12 @@ class IslandMapTest {
                     if (n.isLand()) {
                         return true;
                     } else {
-                        n.getMutablePayload().setClassification(Classification.WATER_NEAR_ISLAND);
+                        if (n.getMutablePayload().getClassification() != Classification.WATER_NEAR_ISLAND) {
+                            n.getMutablePayload().setClassification(Classification.WATER_NEAR_ISLAND);
+                            shorePointsCount.incrementAndGet();
+                        }
                         p.getMutablePayload().shoreWaterCardinality++;
                         System.out.println("          Water near island: " + n);
-
-                        shorePoints.add(n);
 
                         minMaxPointTracker.accept(n);
 
@@ -114,7 +106,8 @@ class IslandMapTest {
 
         String actual = islandMap.export('.', 'X');
         System.out.println(actual);
-        System.out.println("shore points = " + shorePoints.size());
+        System.out.println("shore points = " + shorePointsCount.get());
+        then(shorePointsCount.get()).isEqualTo(116);
 
         String expected = """
 ..............~~~~~~~~~~~~~~~~~~~~~.............
@@ -204,7 +197,6 @@ class IslandMapTest {
         final Point<MarkerPayload> startPoint = islandMap.getPoint(2, 7);
         then(startPoint.isLand()).isTrue();
 
-        final Set<Point<MarkerPayload>> shorePoints = new HashSet<>();
         final MinMaxPointTracker minMaxPointTracker = new MinMaxPointTracker();
         final int count = traversal.traverseBFS(startPoint,
                 p -> {
@@ -217,8 +209,6 @@ class IslandMapTest {
                 n.getMutablePayload().setClassification(Classification.WATER_NEAR_ISLAND);
                 p.getMutablePayload().shoreWaterCardinality++;
                 System.out.println("          Water near island: " + n);
-
-                shorePoints.add(n);
 
                 minMaxPointTracker.accept(n);
 
@@ -248,26 +238,12 @@ class IslandMapTest {
 
         String actual = islandMap.export('.', 'X');
         System.out.println(actual);
-        System.out.println("shore points = " + shorePoints.size());
 
-//        String expected = """
-//              ~~~~~~~~~~~~~~~~~~~~~            .
-//           ~~~~XXXXXXXXXXXXXXXXXXX~~~~         .
-//        ~~~~XXXXXX~~~XXXX~XXX~~~~XXXX~~~~      .
-//        ~XXXXX~~~~~ ~~XX~~~~X~  ~~~XXXXX~      .
-//      ~~~XXXXX~~~~~~~~XX~~~~X~~~  ~XXXXX~      .
-//      ~XXXXXXXXXXXXXXXXXX~~X~~X~~~~~X~~~~~~    .
-//      ~~~XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX~    .
-//        ~~~~~XXXXXXXXXXXXXXXXXXXX~~~~~~~~~~    .
-//            ~~~~~~~~~~~~~~~~~~~~~~             .
-//""";
-//        then(actual).isEqualTo(expected);
+        then(minMaxPointTracker.getMinX()).isEqualTo(0);
+        then(minMaxPointTracker.getMaxX()).isEqualTo(248);
 
-//        then(minMaxPointTracker.getMinX()).isEqualTo(6);
-//        then(minMaxPointTracker.getMaxX()).isEqualTo(42);
-//
-//        then(minMaxPointTracker.getMinY()).isEqualTo(0);
-//        then(minMaxPointTracker.getMaxY()).isEqualTo(8);
+        then(minMaxPointTracker.getMinY()).isEqualTo(2);
+        then(minMaxPointTracker.getMaxY()).isEqualTo(207);
 
         // ########################## Part 2
         val lakeCount = new AtomicInteger();
